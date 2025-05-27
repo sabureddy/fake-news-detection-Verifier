@@ -18,13 +18,23 @@ def load_models():
 
 vectorizer, model = load_models()
 
+# Convert TSV to CSV if needed
+if os.path.exists("train.tsv"):
+    df = pd.read_csv("train.tsv", sep="\t")
+    df.to_csv("train.csv", index=False)
+    st.success("✅ TSV converted to CSV successfully!")
+
 # Function to fetch Kaggle dataset (Fake News & LIAR Dataset)
 @st.cache_resource
 def load_kaggle_data():
-    """Load and preprocess fake news datasets from Kaggle."""
+    """Check if dataset files exist before loading."""
+    if not os.path.exists("fake_news.csv") or not os.path.exists("liar_dataset.csv"):
+        st.error("❌ Dataset files missing! Ensure 'fake_news.csv' and 'liar_dataset.csv' are in the directory.")
+        return None
+
     try:
-        fake_news = pd.read_csv("https://raw.githubusercontent.com/lutzroeder/fake-news-detection/main/fake_news.csv")
-        liar_dataset = pd.read_csv("https://raw.githubusercontent.com/lutzroeder/fake-news-detection/main/liar_dataset.csv")
+        fake_news = pd.read_csv("fake_news.csv")
+        liar_dataset = pd.read_csv("liar_dataset.csv")
 
         # Combine datasets for training expansion
         combined_data = pd.concat([fake_news, liar_dataset], ignore_index=True)
@@ -79,4 +89,4 @@ if latest_news:
     for headline in latest_news:
         st.write(f"🔹 {headline}")
 
-st.info("🔎 AI-powered fake news detection tool with **expanded dataset training**.")
+st.info("🔎 AI-powered fake news detection tool with **expanded dataset training** and **TSV conversion support**.")
