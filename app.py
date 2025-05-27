@@ -1,4 +1,47 @@
 import streamlit as st
+import pandas as pd
+import joblib
+import os
+
+# Ensure model files exist
+if "vectorizer.jb" in os.listdir(".") and "lr_model.jb" in os.listdir("."):
+    vectorizer, model = joblib.load("vectorizer.jb"), joblib.load("lr_model.jb")
+else:
+    st.error("Model files not found! Ensure vectorizer.jb and lr_model.jb exist in the repository.")
+
+# Streamlit UI
+st.title("📰 Fake News Detector")
+st.write("Paste a news article below to determine if it's Fake or Real.")
+
+# User input
+user_input = st.text_area("Enter the news text to verify:", height=150)
+
+# Fake news prediction with unique button keys
+if st.button("🔍 Check News", key="check_news"):
+    if user_input.strip():
+        prediction = model.predict(vectorizer.transform([user_input]))[0]
+        st.success("✅ The News is Real!") if prediction == 1 else st.error("❌ The News is Fake!")
+    else:
+        st.warning("⚠️ Please enter some text for analysis.")
+
+if st.button("🔄 Refresh", key="refresh_page"):
+    st.experimental_rerun()
+
+# File Upload option (for bulk verification)
+uploaded_file = st.file_uploader("Upload a CSV file for batch verification", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.write("Uploaded Data Preview:", df.head())  # Show a sample of the data
+    # Perform fake news detection on the dataset (logic to be added)
+
+st.info("This tool helps users verify news sources using AI-powered analysis.")
+
+# Debugging info
+st.write("Current directory files:", os.listdir("."))
+
+
+import streamlit as st
 import torch
 import joblib
 import os
